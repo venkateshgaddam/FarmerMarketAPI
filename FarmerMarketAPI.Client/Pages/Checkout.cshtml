@@ -1,0 +1,208 @@
+﻿@page
+@model FarmerMarketAPI.Client.Pages.CheckoutModel
+
+@{
+    ViewData["Title"] = "Add to Cart";
+}
+
+<style>
+
+    .product-item {
+        display: inline-block;
+        margin-top: 30px;
+        margin-bottom: 30px;
+        width: 400px;
+        padding: 5px;
+        border: 2px solid #80de39;
+        text-align: start;
+    }
+
+    .products {
+        display: inline-block;
+        margin: 20px;
+        width: 200px;
+        padding: 15px;
+        border: 3px solid #80de39;
+        text-align: center;
+    }
+
+    .product-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .product-image {
+        width: 100px;
+        height: 100px;
+        margin-right: 20px;
+    }
+
+    .product-details {
+        flex-grow: 1;
+    }
+
+    .quantity-container {
+        margin-top: 15px;
+        display: flex;
+        align-items: center;
+    }
+
+    .quantity-btn {
+        background-color: #f0f0f0;
+        border: none;
+        padding: 5px;
+        margin: 0 5px;
+        cursor: pointer;
+    }
+
+    .add-to-cart-btn {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+    }
+
+    .txtInput {
+        width: 30px;
+    }
+</style>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<div id="productsList"> </div>
+
+<div class="quantity-container">
+    <h4>Items in the Basket: </h4>
+    <input type="text" id="quantity" class="product-item" onchange="addToCart()" />
+</div>
+
+<div id="productList"> </div>
+
+<div>
+    <p id="idxTotalPrice"></p>
+</div>
+
+<!-- Modal Popup -->
+<div id="myModal" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Error</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="errorMessage"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+
+    const productData = [];
+    const API_URL = 'https://cixvvde8v7.execute-api.us-east-1.amazonaws.com/Prod';
+    $(document).ready(function () {
+        // Call the API to fetch the list of products
+        $.ajax({
+            url: 'https://cixvvde8v7.execute-api.us-east-1.amazonaws.com/Prod/api/Products',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                // On success, iterate through the products and display them
+                data.forEach(function (product) {
+                    productData.push(product.productCode);
+                    var productItem = $('<div>').addClass('products');
+                    var productName = $('<h4>').text(product.name);
+                    var productDescription = $('<p>').text(product.productCode);
+                    var productPrice = $('<p>').text('Price: $' + product.price);
+
+
+                    productItem.append(productName, productDescription, productPrice);
+                    $('#productsList').append(productItem);
+                });
+            },
+            error: function (xhr, status, error) {
+                // Show the modal
+                var myModal = new bootstrap.Modal(document.getElementById('myModal'));
+                myModal.show();
+
+                // Set the error message
+                document.getElementById('errorMessage').innerText = 'Error Occured while Processing the Request';
+                console.log(error);
+            }
+        });
+    });
+
+    function increaseQuantity() {
+        var quantityInput = document.getElementById("quantity");
+        var quantity = parseInt(quantityInput.value);
+        quantityInput.value = quantity + 1;
+    }
+
+    function decreaseQuantity() {
+        var quantityInput = document.getElementById("quantity");
+        var quantity = parseInt(quantityInput.value);
+        if (quantity >= 1) {
+            quantityInput.value = quantity - 1;
+        }
+    }
+
+    async function addToCart() {
+        var quantityInput = document.getElementById("quantity");
+        var quantity = parseInt(quantityInput.value);
+        var isModalValid = true;
+        var input = quantityInput.value.split(',')
+
+        input.forEach(function (item) {
+            if (productData.indexOf(item) === -1) {
+                isModalValid = false;
+            }
+        });
+
+        if (isModalValid) {
+
+            await $.ajax({
+                url: `${API_URL}/api/Basket/Add`,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    Products: quantityInput.value
+                }),
+                dataType: 'json',
+                success: function (data) {
+                    var item = document.getElementById("idxTotalPrice");
+                    item.innerHTML = 'Total Price of the Cart: ' + data.cartValue;
+
+                    // Show the modal
+                    var myModal = new bootstrap.Modal(document.getElementById('myModal'));
+                    myModal.show();
+
+                    // Set the error message
+                    document.getElementById('errorMessage').innerText = 'Error Occured while Processing the Request';
+                    console.log(error);
+                },
+                error: function (xhr, status, error) {
+                    console.log(error);
+
+                    // Show the modal
+                    var myModal = new bootstrap.Modal(document.getElementById('myModal'));
+                    myModal.show();
+
+                    // Set the error message
+                    document.getElementById('errorMessage').innerText = 'Error Occured while Processing the Request';
+                    console.log(error);
+                }
+            });
+        } else {
+            // Show the modal
+            var myModal = new bootstrap.Modal(document.getElementById('myModal'));
+            myModal.show();
+
+            // Set the error message
+            document.getElementById('errorMessage').innerText = `Input is invalid. Please check your input ${quantityInput.value}`;
+        }
+    }
+</script>

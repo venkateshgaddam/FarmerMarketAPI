@@ -18,10 +18,15 @@ namespace FarmerMarketAPI.CheckoutSystem.Controllers
         public ICheckoutService CheckoutService => checkoutService;
 
         [HttpPost("Add")]
-        public async Task<IActionResult> AddToBasket([FromBody] string productCode)
+        public async Task<IActionResult> AddToBasket([FromBody] CheckoutRequest checkoutRequest)
         {
-            var result = await CheckoutService.AddToBasket(productCode);
-            return PackageData(result, System.Net.HttpStatusCode.OK);
+            AddBasketResponse addBasketResponse = new AddBasketResponse();
+            if (checkoutRequest.Products.Length >= 3)
+            {
+                addBasketResponse = await CheckoutService.AddToBasket(checkoutRequest.Products);
+            }
+            return PackageData(addBasketResponse, System.Net.HttpStatusCode.OK);
+
         }
 
         [HttpPost("TotalPrice")]
@@ -36,15 +41,5 @@ namespace FarmerMarketAPI.CheckoutSystem.Controllers
             decimal totalPrice = await CheckoutService.CalculateTotalPrice(keyValuePairs);
             return totalPrice;
         }
-
-
-        //[HttpDelete("Remove")]
-        //public async Task<IActionResult> RemoveProduct([FromBody] string productCode)
-        //{
-        //    var result = await CheckoutService.AddToBasket(productCode);
-        //    return PackageData(result, System.Net.HttpStatusCode.OK);
-        //}
     }
-
-    
 }

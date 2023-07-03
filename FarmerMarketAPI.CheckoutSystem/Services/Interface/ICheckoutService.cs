@@ -7,5 +7,6 @@ namespace FarmerMarketAPI.CheckoutSystem.Services.Interface
         Task<decimal> CalculateTotalPrice(Dictionary<string, int> basketItemDetails);
 
         Task<AddBasketResponse> AddToBasket(string productCode);
+
     }
 }

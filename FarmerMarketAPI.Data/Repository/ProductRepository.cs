@@ -10,7 +10,6 @@ namespace FarmerMarketAPI.Data.Repository
 {
     public class ProductRepository : IProductRepository
     {
-        private List<Product> products;
 
         private readonly BasketDbContext dbContext;
 
@@ -21,10 +20,19 @@ namespace FarmerMarketAPI.Data.Repository
 
         }
 
+        public async Task<List<Product>> GetProducts()
+        {
+            var result = dbContext.BasketItems.ToList();
+
+            return await Task.FromResult(result);
+        }
+
+
         public Product GetProductByCode(string productCode)
         {
-            Console.WriteLine(  "WELCOME!!!");
-            return dbContext.BasketItems.FirstOrDefault(p => p.ProductCode == productCode);
+            var dataItems = dbContext.BasketItems.ToList();
+            var result = dataItems.FirstOrDefault(p => p.ProductCode.ToLower() == productCode.ToLower());
+            return result;
         }
         private static void SeedData(BasketDbContext dbContext)
         {

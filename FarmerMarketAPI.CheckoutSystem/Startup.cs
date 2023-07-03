@@ -27,8 +27,6 @@ public class Startup
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<IDiscountRuleEngine, DiscountRuleEngine>();
         services.AddScoped<ICheckoutService, CheckoutService>();
-        services.AddScoped<ICacheService, CacheService>();
-        services.AddMemoryCache();
 
         services.AddScoped(a =>
         {
@@ -76,6 +74,7 @@ public class Startup
         {
             //c.SwaggerEndpoint("/swagger/v1/swagger.json", "FarmerMarketApi v1");
             //c.RoutePrefix = "";
+
             c.SwaggerEndpoint("/Prod/swagger/v1/swagger.json", "FarmerMarketApi v1");
             c.RoutePrefix = "swagger/ui"; // Set Swagger UI at the root URL
         });

@@ -6,5 +6,7 @@
 
         public int TotalItems { get; set; }
 
+        public decimal TotalDiscount { get; set; }
+
     }
 }

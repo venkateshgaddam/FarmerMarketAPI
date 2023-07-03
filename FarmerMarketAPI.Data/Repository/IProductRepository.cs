@@ -10,5 +10,8 @@ namespace FarmerMarketAPI.Data.Repository
     public interface IProductRepository
     {
         Product GetProductByCode(string productCode);
+
+
+        Task<List<Product>> GetProducts();
     }
 }

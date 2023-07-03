@@ -38,7 +38,7 @@ namespace FarmerMarketAPI.CheckoutSystem.Tests
             string productCode = "CH1";
 
             // Act
-            var result = _basketController.AddToBasket(productCode);
+            var result = _basketController.AddToBasket(new CheckoutRequest() { Products = productCode });
 
             // Assert
             Assert.IsType<OkResult>(result);
