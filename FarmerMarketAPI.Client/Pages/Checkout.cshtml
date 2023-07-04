@@ -6,23 +6,29 @@
 }
 
 <style>
+    .subtitle {
+        display: block;
+        margin-top: 5px;
+        font-size:15px;
+    }
 
-    .product-item {
+    .product-item { 
         display: inline-block;
-        margin-top: 30px;
-        margin-bottom: 30px;
+        margin: 20px;
         width: 400px;
-        padding: 5px;
+        padding: 10px;
         border: 2px solid #80de39;
         text-align: start;
+        border-top-left-radius: 5px;
+        border-bottom-right-radius: 5px;
     }
 
     .products {
         display: inline-block;
         margin: 20px;
         width: 200px;
-        padding: 15px;
-        border: 3px solid #80de39;
+        padding: 10px;
+        border: 2px solid #80de39;
         text-align: center;
     }
 
@@ -73,14 +79,15 @@
 <div id="productsList"> </div>
 
 <div class="quantity-container">
-    <h4>Items in the Basket: </h4>
-    <input type="text" id="quantity" class="product-item" onchange="addToCart()" />
+    <h4>Items in the Basket: <span class="subtitle"> (Enter the product Code)</span></h4>
+    <input type="text" id="quantity" class="product-item " onchange="addToCart()" />
 </div>
 
 <div id="productList"> </div>
 
 <div>
     <p id="idxTotalPrice"></p>
+    <p id="idCartDetails"></p>
 </div>
 
 <!-- Modal Popup -->
@@ -115,8 +122,8 @@
                 data.forEach(function (product) {
                     productData.push(product.productCode);
                     var productItem = $('<div>').addClass('products');
-                    var productName = $('<h4>').text(product.name);
-                    var productDescription = $('<p>').text(product.productCode);
+                    var productName = $('<h4>').text('Name: '+product.name);
+                    var productDescription = $('<p>').text('Code: '+ product.productCode);
                     var productPrice = $('<p>').text('Price: $' + product.price);
 
 
@@ -157,7 +164,7 @@
         var input = quantityInput.value.split(',')
 
         input.forEach(function (item) {
-            if (productData.indexOf(item) === -1) {
+            if (productData.indexOf(item.toUpperCase()) === -1) {
                 isModalValid = false;
             }
         });
@@ -175,14 +182,8 @@
                 success: function (data) {
                     var item = document.getElementById("idxTotalPrice");
                     item.innerHTML = 'Total Price of the Cart: ' + data.cartValue;
-
-                    // Show the modal
-                    var myModal = new bootstrap.Modal(document.getElementById('myModal'));
-                    myModal.show();
-
-                    // Set the error message
-                    document.getElementById('errorMessage').innerText = 'Error Occured while Processing the Request';
-                    console.log(error);
+                    var cartDetailsItem = document.getElementById("idCartDetails");
+                    cartDetailsItem.innerHTML='CartDetails: ' + data.cartDetails;
                 },
                 error: function (xhr, status, error) {
                     console.log(error);

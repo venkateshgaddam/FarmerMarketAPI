@@ -18,25 +18,11 @@ namespace FarmerMarketAPI.CheckoutSystem.Services
             this.discountRuleEngine = discountRuleEngine;
         }
 
-        public async Task<AddBasketResponse> AddToBasket(string productCode)
+        public async Task<Dictionary<string, int>> AddToBasket(List<string> productCode)
         {
             try
             {
-                int _totalItems = 0;
-                decimal _totalPrice = 0;
-                decimal discountAmount = 0;
-                List<string> _productCodes = new List<string>();
-                if (productCode.Contains(','))
-                {
-                    _productCodes = productCode.Split(",").ToList();
-                }
-                else
-                {
-                    _productCodes.Add(productCode);
-                }
-
-
-                foreach (var product in _productCodes)
+                foreach (var product in productCode)
                 {
                     if (_basketItemDetails.ContainsKey(product))
                     {
@@ -50,29 +36,7 @@ namespace FarmerMarketAPI.CheckoutSystem.Services
                     }
                 }
 
-                if (_basketItemDetails.Any())
-                {
-                    foreach (var item in _basketItemDetails)
-                    {
-                        string _productCode = item.Key;
-                        int quantity = item.Value;
-                        var _product = productRepository.GetProductByCode(_productCode);
-                        _totalItems += quantity;
-                        if (_product != null)
-                        {
-                            _totalPrice += quantity * _product.Price;
-                        }
-                    }
-
-                    discountAmount = await discountRuleEngine.CalculateDiscount(_basketItemDetails, productRepository);
-                    _totalPrice -= discountAmount;
-                }
-                return new AddBasketResponse
-                {
-                    CartValue = _totalPrice,
-                    TotalItems = _totalItems,
-                    TotalDiscount = discountAmount
-                };
+                return await Task.FromResult(_basketItemDetails);
 
             }
             catch (Exception ex)
@@ -82,27 +46,27 @@ namespace FarmerMarketAPI.CheckoutSystem.Services
             }
         }
 
-        public async Task<decimal> CalculateTotalPrice(Dictionary<string, int> basketItemDetails)
+        public async Task<(decimal totalPrice, decimal totalDiscount)> CalculateTotalPrice(Dictionary<string, int> basketItemDetails)
         {
             decimal totalPrice = 0;
-
+            int _totalItems = 0;
             foreach (var item in basketItemDetails)
             {
                 string productCode = item.Key;
                 int quantity = item.Value;
                 var product = productRepository.GetProductByCode(productCode);
-
+                _totalItems += quantity;
                 if (product != null)
                 {
                     totalPrice += quantity * product.Price;
                 }
             }
 
-            decimal discountAmount = await discountRuleEngine.CalculateDiscount(basketItemDetails, productRepository);
-            totalPrice -= discountAmount;
+            decimal totalDiscount = await discountRuleEngine.CalculateDiscount(basketItemDetails, productRepository);
+            totalPrice -= totalDiscount;
 
-            return totalPrice;
+            return (totalPrice, totalDiscount);
         }
-         
+
     }
 }

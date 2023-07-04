@@ -1,3 +1,4 @@
+using FarmerMarketAPI.CheckoutSystem.Biz;
 using FarmerMarketAPI.CheckoutSystem.Services;
 using FarmerMarketAPI.CheckoutSystem.Services.Interface;
 using FarmerMarketAPI.Common.Interfaces;
@@ -27,6 +28,7 @@ public class Startup
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<IDiscountRuleEngine, DiscountRuleEngine>();
         services.AddScoped<ICheckoutService, CheckoutService>();
+        services.AddScoped<IBasketBiz, BasketBiz>();
 
         services.AddScoped(a =>
         {

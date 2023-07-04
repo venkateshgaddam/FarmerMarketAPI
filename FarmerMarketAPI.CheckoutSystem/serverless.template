@@ -10,6 +10,7 @@
       "Properties": {
         "Handler": "FarmerMarketAPI.CheckoutSystem::FarmerMarketAPI.CheckoutSystem.LambdaEntryPoint::FunctionHandlerAsync",
         "Runtime": "dotnet6",
+        "FunctionName" : "FarmerMarketAPI",
         "CodeUri": "",
         "MemorySize": 256,
         "Timeout": 30,

@@ -1,4 +1,5 @@
-﻿using FarmerMarketAPI.CheckoutSystem.Services.Interface;
+﻿using FarmerMarketAPI.CheckoutSystem.Biz;
+using FarmerMarketAPI.CheckoutSystem.Services.Interface;
 using FarmerMarketAPI.Data.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,14 +9,13 @@ namespace FarmerMarketAPI.CheckoutSystem.Controllers
     [ApiController]
     public class BasketController : BaseController
     {
-        private readonly ICheckoutService checkoutService;
+        private readonly IBasketBiz checkoutService;
 
-        public BasketController(ICheckoutService checkoutService)
+        public BasketController(IBasketBiz checkoutService)
         {
             this.checkoutService = checkoutService;
         }
 
-        public ICheckoutService CheckoutService => checkoutService;
 
         [HttpPost("Add")]
         public async Task<IActionResult> AddToBasket([FromBody] CheckoutRequest checkoutRequest)
@@ -23,7 +23,7 @@ namespace FarmerMarketAPI.CheckoutSystem.Controllers
             AddBasketResponse addBasketResponse = new AddBasketResponse();
             if (checkoutRequest.Products.Length >= 3)
             {
-                addBasketResponse = await CheckoutService.AddToBasket(checkoutRequest.Products);
+                addBasketResponse = await checkoutService.AddItemsToBasket(checkoutRequest.Products);
             }
             return PackageData(addBasketResponse, System.Net.HttpStatusCode.OK);
 
@@ -38,7 +38,7 @@ namespace FarmerMarketAPI.CheckoutSystem.Controllers
                 {"AP1",1 },
                 {"MK1",1 }
             };
-            decimal totalPrice = await CheckoutService.CalculateTotalPrice(keyValuePairs);
+            decimal totalPrice = await checkoutService.CalculateTotalPrice(keyValuePairs);
             return totalPrice;
         }
     }

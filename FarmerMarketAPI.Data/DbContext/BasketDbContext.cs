@@ -5,7 +5,12 @@ namespace FarmerMarketAPI.Data.DbContext
 {
     public class BasketDbContext : Microsoft.EntityFrameworkCore.DbContext
     {
-        public DbSet<Product> BasketItems { get; set; }
+        public virtual DbSet<Product> BasketItems { get; set; }
+
+        public BasketDbContext()
+        {
+
+        }
 
         public BasketDbContext(DbContextOptions<BasketDbContext> options) : base(options)
         {

@@ -8,5 +8,7 @@
 
         public decimal TotalDiscount { get; set; }
 
+        public string? CartDetails { get; set; }
+
     }
 }
