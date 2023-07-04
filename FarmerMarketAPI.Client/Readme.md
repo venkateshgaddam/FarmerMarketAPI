@@ -1,25 +1,28 @@
-# ASP.NET Core Web API Serverless Application
+# FarmerMarket API Serverless Application
 
-This project shows how to run an ASP.NET Core Web Application as a serverless application. The NuGet package [Amazon.Lambda.AspNetCoreServer](https://www.nuget.org/packages/Amazon.Lambda.AspNetCoreServer) contains a Lambda function that is used to translate requests from API Gateway into the ASP.NET Core framework and then the responses from ASP.NET Core back to API Gateway.
+This project  run as a ASP.NET Core WebAPI serverless application.  
 
-For more information about how the Amazon.Lambda.AspNetCoreServer package works and how to extend its behavior view its [README](https://github.com/aws/aws-lambda-dotnet/blob/master/Libraries/src/Amazon.Lambda.AspNetCoreServer/README.md) file in GitHub.
+It is accessible @ https://cixvvde8v7.execute-api.us-east-1.amazonaws.com/Prod/swagger/ui/index.html
+
+# FarmerMarket Client
+This project  run as a ASP.NET Core Web serverless application with Razor Pages. 
+
+
+It can be accessed @ https://pch9v5w8z5.execute-api.us-east-1.amazonaws.com/Prod
+
+From the UI, You just need to enter the product code in the text box and onchange event will take 
+care of giving the cart value as real time as possible instead of waiting till we click a button.
+ 
+I have used swagger end points for the API to make testing of the API simpler.
+For Testing, I have used XUNIT & Moq Frameworks.
+I have written tests for Controller and Service Methods as two Seperate categories
 
 ### Adding AWS SDK for .NET ###
 
 To integrate the AWS SDK for .NET with the dependency injection system built into ASP.NET Core add the NuGet 
 package [AWSSDK.Extensions.NETCore.Setup](https://www.nuget.org/packages/AWSSDK.Extensions.NETCore.Setup/). Then in 
 the `ConfigureServices` method  in `Startup.cs` file register the AWS service with the `IServiceCollection`.
-
-```csharp
-public void ConfigureServices(IServiceCollection services)
-{
-    services.AddMvc();
-
-    // Add S3 to the ASP.NET Core dependency injection framework.
-    services.AddAWSService<Amazon.S3.IAmazonS3>();
-}
-```
-
+ 
 ### Configuring for API Gateway HTTP API ###
 
 API Gateway supports the original REST API and the new HTTP API. In addition HTTP API supports 2 different
@@ -27,6 +30,42 @@ payload formats. When using the 2.0 format the base class of `LambdaEntryPoint` 
 For the 1.0 payload format the base class is the same as REST API which is `Amazon.Lambda.AspNetCoreServer.APIGatewayProxyFunction`.
 **Note:** when using the `AWS::Serverless::Function` CloudFormation resource with an event type of `HttpApi` the default payload
 format is 2.0 so the base class of `LambdaEntryPoint` must be `Amazon.Lambda.AspNetCoreServer.APIGatewayHttpApiV2ProxyFunction`.
+
+
+## Packaging as a Docker image.
+
+This project is configured to package the Lambda function as a Docker image. The default configuration for the project and the Dockerfile is to build 
+the .NET project on the host machine and then execute the `docker build` command which copies the .NET build artifacts from the host machine into 
+the Docker image. 
+
+The `--docker-host-build-output-dir` switch, which is set in the `aws-lambda-tools-defaults.json`, triggers the 
+AWS .NET Lambda tooling to build the .NET project into the directory indicated by `--docker-host-build-output-dir`. The Dockerfile 
+has a **COPY** command which copies the value from the directory pointed to by `--docker-host-build-output-dir` to the `/var/task` directory inside of the 
+image.
+
+Alternatively the Docker file could be written to use [multi-stage](https://docs.docker.com/develop/develop-images/multistage-build/) builds and 
+have the .NET project built inside the container. Below is an example of building the .NET project inside the image.
+
+```dockerfile
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
+WORKDIR /app
+EXPOSE 80
+
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+WORKDIR /src
+COPY ["FarmerMarketAPI.CheckoutSystem/FarmerMarketAPI.CheckoutSystem.csproj", "FarmerMarketAPI.CheckoutSystem/"]
+RUN dotnet restore "FarmerMarketAPI.CheckoutSystem/FarmerMarketAPI.CheckoutSystem.csproj"
+COPY . .
+WORKDIR "/src/FarmerMarketAPI.CheckoutSystem"
+RUN dotnet build "FarmerMarketAPI.CheckoutSystem.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "FarmerMarketAPI.CheckoutSystem.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+```
 
 ### Configuring for Application Load Balancer ###
 
@@ -46,11 +85,11 @@ Application Load Balancer.
 * Startup.cs - usual ASP.NET Core Startup class used to configure the services ASP.NET Core will use.
 
 
-## Here are some steps to follow from Visual Studio:
+## Here are some stepsI followed from Visual Studio:
 
-To deploy your Serverless application, right click the project in Solution Explorer and select *Publish to AWS Lambda*.
+To deploy Serverless application, right click the project in Solution Explorer and select *Publish to AWS Lambda*.
 
-To view your deployed application open the Stack View window by double-clicking the stack name shown beneath the AWS CloudFormation node in the AWS Explorer tree. The Stack View also displays the root URL to your published application.
+To view deployed application open the Stack View window by double-clicking the stack name shown beneath the AWS CloudFormation node in the AWS Explorer tree. The Stack View also displays the root URL to your published application.
 
 ## Here are some steps to follow to get started from the command line:
 
