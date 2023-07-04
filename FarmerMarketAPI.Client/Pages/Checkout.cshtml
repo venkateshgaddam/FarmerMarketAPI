@@ -73,9 +73,13 @@
     .txtInput {
         width: 30px;
     }
+    .nodisplay{
+        display:none;
+    }
 </style>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+<p id="idLoader"></p>
 <div id="productsList"> </div>
 
 <div class="quantity-container">
@@ -106,21 +110,25 @@
 </div>
 
 
-
 <script>
 
     const productData = [];
     const API_URL = 'https://cixvvde8v7.execute-api.us-east-1.amazonaws.com/Prod';
     $(document).ready(function () {
         // Call the API to fetch the list of products
+        var dt = document.getElementById("idLoader");
+        dt.innerHTML = 'Loading Data.... ';
+         
         $.ajax({
             url: 'https://cixvvde8v7.execute-api.us-east-1.amazonaws.com/Prod/api/Products',
             type: 'GET',
             dataType: 'json',
             success: function (data) {
+                $('#idLoader').addClass('nodisplay');
                 // On success, iterate through the products and display them
                 data.forEach(function (product) {
                     productData.push(product.productCode);
+                    var productName = $('<h4>').text('Name: '+product.name);
                     var productItem = $('<div>').addClass('products');
                     var productName = $('<h4>').text('Name: '+product.name);
                     var productDescription = $('<p>').text('Code: '+ product.productCode);
@@ -132,6 +140,7 @@
                 });
             },
             error: function (xhr, status, error) {
+                $('#idLoader').text('Error occured while fecthing the data from API');
                 // Show the modal
                 var myModal = new bootstrap.Modal(document.getElementById('myModal'));
                 myModal.show();
